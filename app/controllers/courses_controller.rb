@@ -58,8 +58,10 @@ class CoursesController < ApplicationController
   #-------------------------for students----------------------
 
   def list
+
+    course_type = params[:course_type]
     #-------QiaoCode--------
-    @courses = Course.where(:open=>true).paginate(page: params[:page], per_page: 4)
+    @courses = Course.where(:open=>true).where(:course_type=>course_type).paginate(page: params[:page], per_page: 4)
     @course = @courses-current_user.courses
     tmp=[]
     @course.each do |course|
