@@ -1,5 +1,5 @@
-class CoursesController < ApplicationController
-
+ class CoursesController < ApplicationController
+  include CoursesHelper
   before_action :student_logged_in, only: [:select, :quit, :list]
   before_action :teacher_logged_in, only: [:new, :create, :edit, :destroy, :update, :open, :close]#add open by qiao
   before_action :logged_in, only: :index
@@ -58,18 +58,24 @@ class CoursesController < ApplicationController
   #-------------------------for students----------------------
 
   def list
-
-    course_type = params[:course_type]
     #-------QiaoCode--------
-    @courses = Course.where(:open=>true).where(:course_type=>course_type).paginate(page: params[:page], per_page: 4)
+    @courses = Course.where(:open=>true)
     @course = @courses-current_user.courses
-    tmp=[]
-    @course.each do |course|
-      if course.open==true
-        tmp<<course
+    @course_type = get_course_info(@course, 'course_type')
+    @course_time = get_course_info(@course, 'course_time')
+    # 如果请求类型是POST,对结果进行过滤
+    if request.post?
+      res=[]
+      @course.each do |course|
+        if check_course_condition(course, 'course_time', params['course']['course_time']) and
+           check_course_condition(course, 'course_type', params['course']['course_type']) and
+           check_course_keyword(course, 'name', params['keyword'])
+          res << course
+        end
       end
+      @course = res
     end
-    @course=tmp
+    @course = @course.paginate(:page => params[:page], :per_page => 5)  
   end
 
   def select
