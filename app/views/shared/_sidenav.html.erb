@@ -47,6 +47,21 @@
                   <span class="label label-info pull-right"><%= current_user.courses.count %></span>
               <% end %>
             </li>
+
+            <!jq++>
+            <li class="list-group-item">
+              <%= link_to timetable_courses_url do %>
+                  <span class="glyphicon glyphicon-chevron-right"></span> 个人课表
+              <% end %>
+            </li>
+
+            <li class="list-group-item">
+              <%= link_to scorecount_courses_url do %>
+                <span class="glyphicon glyphicon-chevron-right"></span> 学分统计
+                <span class="label label-info pull-right"><%= current_user.courses.count %></span>
+              <% end %>
+            </li>
+  
         <% end %>
 
       </ul>

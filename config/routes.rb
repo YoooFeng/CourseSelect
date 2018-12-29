@@ -25,6 +25,8 @@ Rails.application.routes.draw do
       get :close
     end
     collection do
+      get :scorecount
+      get :timetable
       get :list
       post :list
     end

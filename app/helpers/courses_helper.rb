@@ -13,6 +13,7 @@ module CoursesHelper
     }
     param[week_data] + 1
   end
+
   # 生成11行7列的数据
   def get_current_curriculum_table(courses,user)
     # course_time = Array.new(11) { Array.new(7, '') }
@@ -23,7 +24,7 @@ module CoursesHelper
       # check whether the course is open.
       @grades.each do |grade|
         if grade.user.name == user.name
-          if grade.open==true
+          if grade.open == true
             # if it is open, append "_open" to the course name.
            real_course_name = real_course_name.concat("_open")
           end
@@ -31,7 +32,7 @@ module CoursesHelper
       end
       cur_time = String(cur.course_time)
       cur_id = cur.course_time
-      end_j = cur_time.index('(')#index第一次出现的字节位置 end_j=2
+      end_j = cur_time.index('(')
       j = week_data_to_num(cur_time[0...end_j])
       t = cur_time[end_j + 1...cur_time.index(')')].split("-")
       for i in (t[0].to_i..t[1].to_i).each
@@ -41,6 +42,47 @@ module CoursesHelper
       end
     end
     course_time
+  end
+
+  def get_course_score_table(courses, user)
+    # 二维数组,表示学分
+    score_table = Array.new(2) { Array.new(3, 0.0) }
+
+    # 遍历用户已经选的课
+    courses.each do |cur|
+      f_credit = cur.credit.split('/')[1].to_f
+      # 课程学分按照类别进行分别计算
+      if cur.course_type == '公共选修课'
+        score_table[0][0] += f_credit
+        if is_end_course(cur, user)
+          score_table[1][0] += f_credit
+          score_table[1][2] += f_credit
+        end  
+      elsif cur.course_type == '公共必修课'
+        if is_end_course(cur, user)
+          score_table[1][2] += f_credit
+        end  
+      elsif cur.course_type.include?'专业' or cur.course_type.include?'一级学科'
+        score_table[0][1] += f_credit
+        if is_end_course(cur, user)
+          score_table[1][1] += f_credit
+          score_table[1][2] += f_credit
+        end
+      end
+      score_table[0][2] += f_credit
+    end
+    score_table
+  end
+
+  def is_end_course(course, user)
+    @grades = course.grades
+    @is_end = false
+    @grades.each do |grade|
+      if grade.user.name == user.name and grade.grade != nil and grade.grade != '' and grade.grade >= 60
+        @is_end = true
+      end
+    end
+    return @is_end
   end
 
   def is_open_course(course, user)
